@@ -29,6 +29,7 @@ TrafficLight::TrafficLight()
     _currentPhase = TrafficLightPhase::red;
 }
 
+
 void TrafficLight::waitForGreen()
 {
     // FP.5b : add the implementation of the method waitForGreen, in which an infinite while-loop 
@@ -40,12 +41,14 @@ TrafficLightPhase TrafficLight::getCurrentPhase()
 {
     return _currentPhase;
 }
+*/
 
 void TrafficLight::simulate()
 {
     // FP.2b : Finally, the private method „cycleThroughPhases“ should be started in a thread when the public method „simulate“ is called. To do this, use the thread queue in the base class. 
+  	threads.emplace_back(std::thread(&TrafficLight::cycleThroughPhases, this)); 
 }
-*/
+
 
 // virtual function which is executed in a thread
 void TrafficLight::cycleThroughPhases()
@@ -56,9 +59,34 @@ void TrafficLight::cycleThroughPhases()
     // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles. 
   
   	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+  	srand(time(0));
+  
+  	float rand_time = rand() % 2000 + 4000; // Random number in milliseconds between 4000 and 6000
   
   	while(true){
       	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+      	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+      
+      	//Check time interval
+      	if (duration >= rand_time){
+        	if (_currentPhase == TrafficLightPhase::red){
+           		_currentPhase = TrafficLightPhase::green;
+            }
+          	else{
+            	_currentPhase = TrafficLightPhase::red;  
+            }
+          	
+          	// Add this part once task FP.3 is done
+          	/* 
+          	auto this_phase = _currentPhase;
+          	std::future<void> ftr = std::async(std::launch::async, &MessageQueue<TrafficLightPhase>::send, message_queue, std::move(this_phase));
+            */
+          
+          	//Reset timer:
+          	t1 = std::chrono::high_resolution_clock::now();
+          	//Get new random number:
+          	rand_time = rand() % 2000 + 4000;
+        }
       	
     	std::this_thread::sleep_for(std::chrono::milliseconds(1));  
     }

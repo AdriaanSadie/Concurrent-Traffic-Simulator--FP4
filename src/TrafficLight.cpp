@@ -1,5 +1,6 @@
 #include <iostream>
 #include <random>
+#include <future>
 #include "TrafficLight.h"
 
 /* Implementation of class "MessageQueue" */
@@ -12,14 +13,19 @@ T MessageQueue<T>::receive()
     // to wait for and receive new messages and pull them from the queue using move semantics. 
     // The received object should then be returned by the receive function. 
 }
+*/
 
 template <typename T>
 void MessageQueue<T>::send(T &&msg)
 {
     // FP.4a : The method send should use the mechanisms std::lock_guard<std::mutex> 
     // as well as _condition.notify_one() to add a new message to the queue and afterwards send a notification.
+  	std::lock_guard<std::mutex> myLock(q_mutex);
+  	
+  	_queue.push_back(std::move(msg));
+  	q_cond.notify_one();
 }
-*/
+
 
 /* Implementation of class "TrafficLight" */
 
@@ -77,10 +83,11 @@ void TrafficLight::cycleThroughPhases()
             }
           	
           	// Add this part once task FP.3 is done
-          	/* 
+
           	auto this_phase = _currentPhase;
-          	std::future<void> ftr = std::async(std::launch::async, &MessageQueue<TrafficLightPhase>::send, message_queue, std::move(this_phase));
-            */
+          	std::future<void> ftr = std::async(&MessageQueue<TrafficLightPhase>::send, phase_queue, std::move(this_phase));
+         	ftr.wait();
+
           
           	//Reset timer:
           	t1 = std::chrono::high_resolution_clock::now();

@@ -23,7 +23,7 @@ public:
 	void send(T &&msg);
     T receive();
 private:
-    std::deque<TrafficLightPhase> _queue;
+    std::deque<T> _queue;
     std::mutex q_mutex;
     std::condition_variable q_cond;
 };
@@ -60,6 +60,7 @@ private:
 	TrafficLightPhase _currentPhase;
     std::condition_variable _condition;
     std::mutex _mutex;
+    std::shared_ptr<MessageQueue<TrafficLightPhase>> phase_queue;
 };
 
 #endif
